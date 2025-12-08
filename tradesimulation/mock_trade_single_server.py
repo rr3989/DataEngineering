@@ -87,9 +87,9 @@ def continuous_generation():
         elapsed_time = time.time() - start_time
         tps = total_trades_generated / elapsed_time if elapsed_time > 0 else 0
         # Printing FINAL STATS to stderr
-        print(f"\n--- 🛑 Simulation Stopped ---", file=open('sys.stderr', 'w', encoding='utf-8'))
-        print(f"Final Count: {total_trades_generated:,} trades.", file=open('sys.stderr', 'w', encoding='utf-8'))
-        print(f"Average Rate: {tps:,.0f} Trades Per Second (TPS).", file=open('sys.stderr', 'w', encoding='utf-8'))
+        print(f"\n--- 🛑 Simulation Stopped ---")
+        print(f"Final Count: {total_trades_generated:,} trades.")
+        print(f"Average Rate: {tps:,.0f} Trades Per Second (TPS).")
 
 
 if __name__ == '__main__':
