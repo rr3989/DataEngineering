@@ -4,10 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ed470836-8daf-4473-9109-d78e623646ac" name="Changes" comment="Second commit - mock trades simulated and sent to Kafka queue and API endpoint">
+    <list default="true" id="ed470836-8daf-4473-9109-d78e623646ac" name="Changes" comment="hybrid processor sending trades to API and Docker Kafka queue">
       <change afterPath="$PROJECT_DIR$/tradesimulation/mock_trade_gcp_pubsub.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tradesimulation/mock_trade_hybrid_processor.py" beforeDir="false" afterPath="$PROJECT_DIR$/tradesimulation/mock_trade_hybrid_processor.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tradesimulation/mock_trade_single_server.py" beforeDir="false" afterPath="$PROJECT_DIR$/tradesimulation/mock_trade_single_server.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -54,6 +54,7 @@
   "keyToString": {
     "Python.mock_trade_api_server.executor": "Run",
     "Python.mock_trade_gcp_pubsub.executor": "Run",
+    "Python.mock_trade_single_server.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
     "git-widget-placeholder": "master",
@@ -97,7 +98,15 @@
       <option name="project" value="LOCAL" />
       <updated>1765224981323</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="hybrid processor sending trades to API and Docker Kafka queue">
+      <option name="closed" value="true" />
+      <created>1765279673594</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1765279673594</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -114,6 +123,7 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Initial commit - mock trades simulate" />
     <MESSAGE value="Second commit - mock trades simulated and sent to Kafka queue and API endpoint" />
-    <option name="LAST_COMMIT_MESSAGE" value="Second commit - mock trades simulated and sent to Kafka queue and API endpoint" />
+    <MESSAGE value="hybrid processor sending trades to API and Docker Kafka queue" />
+    <option name="LAST_COMMIT_MESSAGE" value="hybrid processor sending trades to API and Docker Kafka queue" />
   </component>
 </project>

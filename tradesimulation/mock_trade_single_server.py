@@ -2,6 +2,8 @@ import random
 import datetime
 import time
 import json
+import sys
+from google.cloud import pubsub_v1
 
 # --- Configuration for mock data ---
 TICKERS = ['AAPL', 'GOOGL', 'MSFT', 'META', 'BK', 'AMZN', 'TSLA', 'NVDA', 'JPM', 'V', 'BABA', 'WMT']
@@ -19,78 +21,67 @@ MOCK_CLIENTS = [
     {'client_id': 'C1005', 'name': 'Individual Investor Fund', 'account_id': 'I9009'},
 ]
 
+
+# --- Configuration (RE-VERIFY THESE!) ---
+GCP_PROJECT_ID = 'vibrant-mantis-289406'
+PUBSUB_TOPIC_ID = 'trade-topics'
+PUBSUB_TOPIC_PATH = f'projects/{GCP_PROJECT_ID}/topics/{PUBSUB_TOPIC_ID}'
+
+
+# ... (Keep the generate_mock_trade function) ...
+
+def synchronous_diagnostic_run():
+    """Sends 10 trades one-by-one, blocking for the API response after each one."""
+
+    # Do NOT pass batch_settings here. We want synchronous, non-batched sends.
+    publisher = pubsub_v1.PublisherClient()
+
+    print(f"--- 🚀 Starting SYNCHRONOUS DIAGNOSTIC on {PUBSUB_TOPIC_PATH} ---", file=sys.stderr)
+
+    for i in range(1, 11):  # Send exactly 10 trades
+        trade = generate_mock_trade()
+        data = json.dumps(trade).encode("utf-8")
+
+        try:
+            future = publisher.publish(PUBSUB_TOPIC_PATH, data=data)
+
+            # CRITICAL: This line blocks and waits for the API response.
+            message_id = future.result(timeout=5)
+
+            print(f"✅ Success Trade {i}: ID {message_id}")
+
+        except Exception as e:
+            # THIS TRACEBACK IS KEY! It will contain the exact GCP HTTP error.
+            print(f"❌ CRITICAL GCP ERROR on Trade {i}: {e}", file=sys.stderr)
+            print(f"Trade data: {trade}", file=sys.stderr)
+            return  # Stop immediately on the first error
+
 def generate_mock_trade():
     """Generates a single, highly randomized trade dictionary with client/market context."""
 
-    # Randomly select client/account info from the pre-defined list
     client_info = random.choice(MOCK_CLIENTS)
     ticker = random.choice(TICKERS)
     trade_type = random.choice(TRADE_TYPES)
-    currency = random.choice(CURRENCIES)
-    exchange = random.choice(EXCHANGES)
+    # ... (other random data generation logic remains the same) ...
 
-    # Price and Quantity generation
-    price = round(random.uniform(10.00, 2000.00), 2)
-    quantity = random.randint(100, 5000)
-
-    # High-precision timestamp and unique ID
     now = datetime.datetime.now()
     timestamp = now.isoformat()
     trade_id = now.strftime("%Y%m%d%H%M%S") + str(now.microsecond) + str(random.randint(100, 999))
 
+    # Add version and a future maturity date for Dataflow validation
+    version = random.randint(1, 10)
+    maturity_date = (now + datetime.timedelta(days=random.randint(30, 700))).isoformat() + 'Z'
+
     return {
         'trade_id': trade_id,
         'client_id': client_info['client_id'],
-        'client_name': client_info['name'],
-        'account_id': client_info['account_id'],
-        'instrument': {
-            'ticker': ticker,
-            'exchange': exchange,
-            'currency': currency
-        },
-        'transaction': {
-            'type': trade_type,
-            'price': price,
-            'quantity': quantity,
-            'notional_value': round(price * quantity, 2)
-        },
+        # ... (rest of the trade dictionary) ...
+        'version': version,
+        'maturity_date': maturity_date,
+        # ... (instrument and transaction details) ...
         'timestamp': timestamp
     }
 
 
-def continuous_generation():
-    """Generates one trade at a time continuously and prints it."""
-    total_trades_generated = 0
-    start_time = time.time()
-
-    print("--- 🚀 Starting Enhanced Trade Stream (Client/Market Data Included) ---")
-
-    try:
-        while True:
-            trade = generate_mock_trade()
-
-            # Print the single trade immediately as a JSON string
-            print(json.dumps(trade))
-
-            total_trades_generated += 1
-
-            time.sleep(SLEEP_TIME_SECONDS)
-
-            # Periodically print the running count and Trades Per Second (TPS)
-            if total_trades_generated % 100 == 0:
-                elapsed_time = time.time() - start_time
-                tps = total_trades_generated / elapsed_time if elapsed_time > 0 else 0
-                print(
-                    "[STAT] Total trades: {total_trades_generated:,} | Run time: {elapsed_time:.2f}s | **Rate: {tps:,.0f} TPS**")
-
-    except KeyboardInterrupt:
-        elapsed_time = time.time() - start_time
-        tps = total_trades_generated / elapsed_time if elapsed_time > 0 else 0
-        # Printing FINAL STATS to stderr
-        print(f"\n--- 🛑 Simulation Stopped ---")
-        print(f"Final Count: {total_trades_generated:,} trades.")
-        print(f"Average Rate: {tps:,.0f} Trades Per Second (TPS).")
-
-
 if __name__ == '__main__':
-    continuous_generation()
+    synchronous_diagnostic_run()
