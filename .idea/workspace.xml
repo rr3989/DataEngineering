@@ -4,12 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ed470836-8daf-4473-9109-d78e623646ac" name="Changes" comment="Initial commit - mock trades simulate">
-      <change afterPath="$PROJECT_DIR$/tradesimulation/mock_trade_api_receiver.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/tradesimulation/mock_trade_hybrid_processor.py" afterDir="false" />
+    <list default="true" id="ed470836-8daf-4473-9109-d78e623646ac" name="Changes" comment="Second commit - mock trades simulated and sent to Kafka queue and API endpoint">
+      <change afterPath="$PROJECT_DIR$/tradesimulation/mock_trade_gcp_pubsub.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tradesimulation/api_client_tester.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/tradesimulation/mock_trade_single_server.py" beforeDir="false" afterPath="$PROJECT_DIR$/tradesimulation/mock_trade_single_server.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tradesimulation/mock_trade_hybrid_processor.py" beforeDir="false" afterPath="$PROJECT_DIR$/tradesimulation/mock_trade_hybrid_processor.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -52,15 +50,16 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Python.mock_trade_api_server.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.lookFeel&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Python.mock_trade_api_server.executor": "Run",
+    "Python.mock_trade_gcp_pubsub.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "master",
+    "settings.editor.selected.configurable": "preferences.lookFeel"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="D:\PyCharm\PycharmProjects\DataEngineering" />
@@ -90,7 +89,15 @@
       <option name="project" value="LOCAL" />
       <updated>1765216348993</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Second commit - mock trades simulated and sent to Kafka queue and API endpoint">
+      <option name="closed" value="true" />
+      <created>1765224981323</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1765224981323</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -106,6 +113,7 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Initial commit - mock trades simulate" />
-    <option name="LAST_COMMIT_MESSAGE" value="Initial commit - mock trades simulate" />
+    <MESSAGE value="Second commit - mock trades simulated and sent to Kafka queue and API endpoint" />
+    <option name="LAST_COMMIT_MESSAGE" value="Second commit - mock trades simulated and sent to Kafka queue and API endpoint" />
   </component>
 </project>
