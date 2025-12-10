@@ -1,188 +1,172 @@
 import apache_beam as beam
-from apache_beam.options.pipeline_options import PipelineOptions, StandardOptions
-from apache_beam.io.gcp.pubsub import ReadFromPubSub
-from apache_beam.io import WriteToBigQuery
-from apache_beam.transforms import userstate
-from apache_beam.coders import StrUtf8Coder
-from apache_beam.pvalue import TaggedOutput
-from apache_beam.transforms import window
-from datetime import datetime
+from apache_beam.options.pipeline_options import PipelineOptions
+from apache_beam import io
 import json
+from datetime import datetime
 import logging
-import sys
 
-# Configure basic logging
-logging.basicConfig(level=logging.INFO, stream=sys.stderr)
-
-# Define TaggedOutput PCollection names
-REJECTED_TAG = 'rejected_trades'
-APPROVED_TAG = 'approved_trades'
+# Set up logging for Cloud Logging
+logging.basicConfig()
+logging.getLogger().setLevel(logging.INFO)
 
 # --- Configuration ---
-# BigQuery Schema (Adjust fields to match your actual trade data)
-BIGQUERY_SCHEMA = {
+PROJECT_ID = 'vibrant-mantis-289406'
+REGION = 'us-central1'
+PUB_SUB_TOPIC = f'projects/{PROJECT_ID}/topics/Trade-Events'
+BIGQUERY_APPROVED_TABLE = f'{PROJECT_ID}:trade_analysis.approved_trades_validated'
+BIGQUERY_REJECTED_TABLE = f'{PROJECT_ID}:trade_analysis.rejected_trades_audit'
+
+# Sinks
+TAG_APPROVED = 'approved_trades'
+TAG_REJECTED = 'rejected_trades'
+
+APPROVED_SCHEMA = {
     'fields': [
         {'name': 'trade_id', 'type': 'STRING', 'mode': 'REQUIRED'},
         {'name': 'version', 'type': 'INTEGER', 'mode': 'REQUIRED'},
-        {'name': 'status', 'type': 'STRING', 'mode': 'REQUIRED'},
-        {'name': 'maturity_date', 'type': 'TIMESTAMP', 'mode': 'NULLABLE'},
-        {'name': 'price', 'type': 'FLOAT', 'mode': 'NULLABLE'},
-        {'name': 'quantity', 'type': 'INTEGER', 'mode': 'NULLABLE'},
-        {'name': 'timestamp', 'type': 'TIMESTAMP', 'mode': 'NULLABLE'},
-        {'name': 'client_id', 'type': 'STRING', 'mode': 'NULLABLE'},
+        {'name': 'client_id', 'type': 'STRING', 'mode': 'REQUIRED'},
+        {'name': 'symbol', 'type': 'STRING', 'mode': 'REQUIRED'},
+        {'name': 'price', 'type': 'FLOAT', 'mode': 'REQUIRED'},
+        {'name': 'quantity', 'type': 'INTEGER', 'mode': 'REQUIRED'},
+        {'name': 'maturity_date', 'type': 'DATE', 'mode': 'NULLABLE'},
+        {'name': 'status', 'type': 'STRING', 'mode': 'REQUIRED'},  # E.g., APPROVED/REPLACED
+    ]
+}
+
+REJECTED_SCHEMA = {
+    'fields': [
+        {'name': 'trade_id', 'type': 'STRING', 'mode': 'REQUIRED'},
+        {'name': 'version', 'type': 'INTEGER', 'mode': 'REQUIRED'},
+        {'name': 'client_id', 'type': 'STRING', 'mode': 'REQUIRED'},
+        {'name': 'rejection_reason', 'type': 'STRING', 'mode': 'REQUIRED'},
+        {'name': 'ingestion_time', 'type': 'TIMESTAMP', 'mode': 'REQUIRED'},
     ]
 }
 
 
-# --- Core Stateful Logic ---
-class TradeValidatorDoFn(beam.DoFn):
-    """
-    Stateful DoFn to manage trade versions and apply business rules.
-    """
 
-    # Define a state variable to hold the last successfully processed trade (JSON string)
-    LAST_TRADE_STATE = userstate.BagStateSpec(
-        'last_trade_state',
-        coder=StrUtf8Coder()
+class TradeValidator(beam.DoFn):
+    """
+    Applies business rules and uses Beam State to track the highest version
+    received for each trade_id.
+    """
+    # Define a state spec to store the highest version for a given key (trade_id)
+    HIGHEST_VERSION_STATE = beam.transforms.userstate.BagStateSpec(
+        'highest_version', beam.coders.PickleCoder()
     )
 
-    def process(self, keyed_trade, last_trade_state=beam.DoFn.StateParam(LAST_TRADE_STATE)):
-        # Input is a KV pair: (trade_id, trade_dict)
-        trade_id, incoming_trade = keyed_trade
+    def process(self, keyed_trade, highest_version_state=beam.DoFn.StateParam(HIGHEST_VERSION_STATE)):
 
-        last_trade_json = last_trade_state.read()
-        last_trade = json.loads(last_trade_json) if last_trade_json else None
+        trade_id, trade_event_bytes = keyed_trade
 
-        is_valid_version = False
-        audit_reason = None
+        # 2. Parse the incoming JSON message
+        try:
+            trade = json.loads(trade_event_bytes.decode('utf-8'))
+        except json.JSONDecodeError:
+            logging.error(f"Failed to parse JSON: {trade_event_bytes}")
+            return
 
-        incoming_version = incoming_trade.get('version', 0)
 
-        # 1. STATEFUL VERSIONING CHECKS
-        if last_trade:
-            last_version = last_trade.get('version', 0)
+        trade_id = trade.get('trade_id')
+        new_version = trade.get('version', 0)
+        maturity_date_str = trade.get('maturity_date')
 
-            # Rule: Reject trades with a lower version than existing.
-            if incoming_version < last_version:
-                audit_reason = f"REJECTED: Lower version ({incoming_version}) than existing ({last_version})."
+        today = datetime.now().strftime('%Y-%m-%d')
+        rejection_reason = None
 
-            # Rule: Replace trades with the same version.
-            elif incoming_version == last_version:
-                audit_reason = f"AUDIT: Replaced trade with same version ({incoming_version})."
-                incoming_trade['status'] = 'UPDATED'
-                is_valid_version = True
+        existing_versions = list(highest_version_state.read())
+        existing_version = max(existing_versions) if existing_versions else 0
 
-            # Accept trades with a higher version.
-            elif incoming_version > last_version:
-                audit_reason = f"AUDIT: Replaced trade with higher version ({incoming_version} > {last_version})."
-                is_valid_version = True
+        # ------------------ BUSINESS RULES -------------------
 
+        # Rule 1: Reject trades with a lower version than existing.
+        if new_version < existing_version:
+            rejection_reason = f"Version {new_version} is lower than existing version {existing_version}."
+
+        # Rule 2: Reject trades with a maturity date earlier than today.
+        elif maturity_date_str < today:
+            rejection_reason = "Maturity date is in the past or invalid."
+
+        # Rule 3: Replace trades with the same version. (Handled by checking if a higher version is needed)
+        elif new_version == existing_version:
+            rejection_reason = f"Version {new_version} already exists. Higher version required to update/replace."
+
+
+        # ------------------ ROUTING -------------------
+
+        if rejection_reason:
+            # Route to Rejected sink
+            trade['rejection_reason'] = rejection_reason
+            trade['ingestion_time'] = datetime.now().isoformat()
+            yield beam.pvalue.TaggedOutput(TAG_REJECTED, trade)
         else:
-            # First time seeing this trade_id, always accept.
-            is_valid_version = True
-            incoming_trade['status'] = 'NEW'
+            # Route to Approved sink and update state
 
-        # 2. BUSINESS RULE CHECKS (Applied only if version is valid)
-        if is_valid_version:
-            maturity_date_str = incoming_trade.get('maturity_date')
+            # 1. Update State
+            if new_version > existing_version:
+                # Clear old version(s) and set the new highest version
+                highest_version_state.clear()
+                highest_version_state.add(new_version)
+                logging.info(f"Updated state for ID {trade_id}: New highest version is {new_version}")
 
-            if maturity_date_str:
-                try:
-                    # Convert maturity date, handling Z (UTC) suffix
-                    maturity_date = datetime.fromisoformat(maturity_date_str.replace('Z', '+00:00'))
-                    today = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
-
-                    # Rule: Reject trades with a maturity date earlier than today (if new/update).
-                    if maturity_date.date() < today.date() and incoming_trade['status'] != 'NEW':
-                        audit_reason = f"REJECTED: Maturity date ({maturity_date.date()}) is in the past."
-                        is_valid_version = False  # Final rejection
-
-                    elif maturity_date < datetime.now():
-                        # Rule: Mark trades as expired if the maturity date has passed.
-                        incoming_trade['status'] = 'EXPIRED'
-
-                    elif incoming_trade['status'] == 'NEW':
-                        incoming_trade['status'] = 'ACTIVE'
-
-                except ValueError:
-                    audit_reason = f"REJECTED: Invalid maturity date format: {maturity_date_str}"
-                    is_valid_version = False
-            else:
-                # If no maturity date, default to active
-                incoming_trade['status'] = 'ACTIVE'
-
-        # 3. FINAL ROUTING AND STATE UPDATE
-        if is_valid_version:
-            # Update state and yield to the approved sink
-            last_trade_state.write(json.dumps(incoming_trade))
-            yield incoming_trade
-
-        else:
-            # Yield rejected trade to the audit side output
-            audit_record = {
-                'trade_id': trade_id,
-                'received_timestamp': datetime.now().isoformat(),
-                'status': 'REJECTED',
-                'reason': audit_reason,
-                'payload': json.dumps(incoming_trade)
-            }
-            yield TaggedOutput(REJECTED_TAG, audit_record)
+            # 2. Add validation status and yield Approved trade
+            trade['status'] = 'APPROVED' if new_version > existing_version else 'REPLACED'
+            yield beam.pvalue.TaggedOutput(TAG_APPROVED, trade)
 
 
-# --- Pipeline Definition ---
-def run_pipeline(argv=None):
-    """Main function to define and run the streaming pipeline."""
+# --- 2. Pipeline Definition ---
 
-    # 1. Define custom pipeline options
-    class TradeOptions(PipelineOptions):
-        @classmethod
-        def _add_argparse_args(cls, parser):
-            parser.add_argument('--input_subscription', required=True, help='Input PubSub subscription.')
-            parser.add_argument('--bq_table_approved', required=True, help='BigQuery table for approved trades.')
-            parser.add_argument('--pubsub_topic_rejected', required=True,
-                                help='PubSub topic for rejected trade audit logs.')
+def run_pipeline():
+    """Builds and runs the Apache Beam pipeline."""
 
-    options = PipelineOptions(argv)
-    trade_options = options.view_as(TradeOptions)
-    options.view_as(StandardOptions).streaming = True
+    # Configure Pipeline Options for Dataflow Runner
+    options = PipelineOptions(
+        runner='DataflowRunner',
+        project=PROJECT_ID,
+        region=REGION,
+        job_name=f'trade-validation-processor-{datetime.now().strftime("%Y%m%d-%H%M%S")}',
+        temp_location=f'gs://{PROJECT_ID}-dataflow-temp/temp',
+        staging_location=f'gs://{PROJECT_ID}-dataflow-temp/staging',
+        streaming=True,  # Crucial for Pub/Sub stream processing
+        save_main_session=True
+    )
 
-    # 2. Build the pipeline
     with beam.Pipeline(options=options) as p:
-        # A. READ FROM PUBSUB AND KEY BY TRADE_ID
-        trades = (p
-                  | 'ReadFromPubSub' >> ReadFromPubSub(subscription=trade_options.input_subscription)
-                  | 'Decode' >> beam.Map(lambda x: x.decode('utf-8'))
-                  | 'ParseJson' >> beam.Map(json.loads)
-                  # Transform to KV: (trade_id, trade_dict) for stateful processing
-                  | 'KeyByTradeId' >> beam.Map(lambda trade: (trade['trade_id'], trade))
-                  # Use Global Window for state to persist across the entire streaming job
-                  | 'GlobalWindow' >> beam.WindowInto(window.GlobalWindows())
-                  )
+        # 1. Read from Pub/Sub
+        trades_stream = p | 'ReadFromPubSub' >> io.ReadFromPubSub(topic=PUB_SUB_TOPIC)
 
-        # B. APPLY STATEFUL VALIDATION LOGIC
-        validation_results = (trades
-                              | 'ValidateAndStoreState' >> beam.ParDo(TradeValidatorDoFn()).with_outputs(REJECTED_TAG,
-                                                                                                         main=APPROVED_TAG)
-                              )
-
-        approved_trades = validation_results[APPROVED_TAG]
-        rejected_trades = validation_results[REJECTED_TAG]
-
-        # C. WRITE APPROVED TRADES TO BIGQUERY
-        approved_trades | 'WriteToBigQuery' >> WriteToBigQuery(
-            table=trade_options.bq_table_approved,
-            schema=BIGQUERY_SCHEMA,
-            write_disposition=beam.io.BigQueryDisposition.WRITE_APPEND,
-            create_disposition=beam.io.BigQueryDisposition.CREATE_IF_NEEDED,
+        keyed_trades = trades_stream | 'KeyByTradeID' >> beam.Map(
+            lambda trade: (json.loads(trade.decode('utf-8')).get('trade_id'), trade)
         )
 
-        # D. WRITE REJECTED TRADES TO PUBSUB AUDIT LOG
-        (rejected_trades
-         | 'SerializeAuditLog' >> beam.Map(json.dumps)
-         | 'EncodeAuditLog' >> beam.Map(lambda x: x.encode('utf-8'))
-         | 'WriteAuditToPubSub' >> beam.io.WriteToPubSub(topic=trade_options.pubsub_topic_rejected)
-         )
+        validated_trades = keyed_trades | 'ValidateAndRoute' >> beam.ParDo(TradeValidator()).with_outputs(
+            TAG_APPROVED, TAG_REJECTED
+        )
+
+        approved_trades = validated_trades[TAG_APPROVED]
+        rejected_trades = validated_trades[TAG_REJECTED]
+
+        # Write Approved Trades to BigQuery
+        approved_trades | 'WriteApprovedToBQ' >> io.WriteToBigQuery(
+            table=BIGQUERY_APPROVED_TABLE,
+            schema=APPROVED_SCHEMA,
+            #schema='SCHEMA_AUTODETECT',
+            create_disposition=io.BigQueryDisposition.CREATE_IF_NEEDED,
+            write_disposition=io.BigQueryDisposition.WRITE_APPEND
+        )
+
+        # Write Rejected Trades to BigQuery Audit Log
+        rejected_trades | 'WriteRejectedToBQ' >> io.WriteToBigQuery(
+            table=BIGQUERY_REJECTED_TABLE,
+            schema=REJECTED_SCHEMA,
+            #schema='SCHEMA_AUTODETECT',
+            create_disposition=io.BigQueryDisposition.CREATE_IF_NEEDED,
+            write_disposition=io.BigQueryDisposition.WRITE_APPEND
+        )
+
+    logging.info("Dataflow Pipeline launched successfully.")
 
 
+# --- Run ---
 if __name__ == '__main__':
     run_pipeline()

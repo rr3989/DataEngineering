@@ -4,13 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ed470836-8daf-4473-9109-d78e623646ac" name="Changes" comment="DataFlow pipeline commit to GCP">
-      <change afterPath="$PROJECT_DIR$/ingestion/Dockerfile" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ingestion/requirements.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ingestion/trade_publisher.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/processing/setup.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/processing/trade_dataflow_pipeline.py" afterDir="false" />
+    <list default="true" id="ed470836-8daf-4473-9109-d78e623646ac" name="Changes" comment="Saved Trades to Local desktop sqllite and Generated Visual reports using matplotlib and dash">
+      <change afterPath="$PROJECT_DIR$/ingestion/startup.sh" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ingestion/trade_publisher.py" beforeDir="false" afterPath="$PROJECT_DIR$/ingestion/trade_publisher.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/processing/setup.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/processing/trade_dataflow_pipeline.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/trade_dataflow_pipeline.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -55,9 +54,13 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "Python.dashboard.executor": "Run",
     "Python.mock_trade_api_server.executor": "Run",
     "Python.mock_trade_gcp_pubsub.executor": "Run",
+    "Python.mock_trade_local_store.executor": "Run",
     "Python.mock_trade_single_server.executor": "Run",
+    "Python.report_generator.executor": "Run",
+    "Python.trade_publisher.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
     "git-widget-placeholder": "master",
@@ -118,7 +121,23 @@
       <option name="project" value="LOCAL" />
       <updated>1765288288607</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="DataFlow pipeline commit to GCP">
+      <option name="closed" value="true" />
+      <created>1765352553849</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1765352553849</updated>
+    </task>
+    <task id="LOCAL-00006" summary="Saved Trades to Local desktop sqllite and Generated Visual reports using matplotlib and dash">
+      <option name="closed" value="true" />
+      <created>1765369135720</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1765369135728</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -138,6 +157,7 @@
     <MESSAGE value="hybrid processor sending trades to API and Docker Kafka queue" />
     <MESSAGE value="trades sent to GCP pub_sub queue successfully" />
     <MESSAGE value="DataFlow pipeline commit to GCP" />
-    <option name="LAST_COMMIT_MESSAGE" value="DataFlow pipeline commit to GCP" />
+    <MESSAGE value="Saved Trades to Local desktop sqllite and Generated Visual reports using matplotlib and dash" />
+    <option name="LAST_COMMIT_MESSAGE" value="Saved Trades to Local desktop sqllite and Generated Visual reports using matplotlib and dash" />
   </component>
 </project>
