@@ -10,18 +10,15 @@ received_trades = []
 def receive_trade():
     """Endpoint to receive a single trade JSON object."""
 
-    # Ensure the request contains JSON data
     if not request.json:
         return jsonify({"message": "Error: Request must be JSON"}), 400
 
     trade_data = request.json
     received_trades.append(trade_data)
 
-    # Print to console to show that the data was received
     print(
         f"✅ Received Trade: {trade_data.get('trade_id')} | Ticker: {trade_data['instrument']['ticker']} | Total Received: {len(received_trades):,}")
 
-    # Respond with success (200 OK)
     return jsonify({"message": "Trade received successfully", "trade_id": trade_data.get('trade_id')}), 200
 
 

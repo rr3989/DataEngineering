@@ -11,7 +11,7 @@ REPORT_DIR = "reports"
 
 # --- Data Loading Function ---
 def load_data():
-    """Connect to SQLite and read data into Pandas DataFrames."""
+    """Connect to SQLite and read data into DataFrames."""
     try:
         conn = sqlite3.connect(DATABASE_FILE)
         df_approve = pd.read_sql_query("SELECT * FROM approved_trades", conn)
@@ -87,10 +87,10 @@ def create_approved_price_histogram(df_approve):
     plt.close()
 
 
-# --- Main Execution ---
+# --- Main  ---
 if __name__ == "__main__":
 
-    # 1. Create report directory if it doesn't exist
+    #  Create report directory if it doesn't exist
     if not os.path.exists(REPORT_DIR):
         os.makedirs(REPORT_DIR)
 

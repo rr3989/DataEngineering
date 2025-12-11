@@ -3,30 +3,23 @@ import sqlite3
 from datetime import datetime, timedelta
 import random
 import os
-import uuid
 
 # --- Configuration ---
 DATABASE_FILE = "trade_validation_split.db"
 TOTAL_TRADES_TO_GENERATE = 5000
 RATE_SECONDS = 0.001
 
-
-def cleanup_database():
-    if os.path.exists(DATABASE_FILE):
-        os.remove(DATABASE_FILE)
-        print(f"--- Cleaned up: Existing database '{DATABASE_FILE}'---")
-
+#def cleanup_database():
+    # if os.path.exists(DATABASE_FILE):
+        # os.remove(DATABASE_FILE)
+        # print(f"--- Cleaned up: '{DATABASE_FILE}'---")
 
 def get_client_info():
-    """mock client data."""
     client_id = random.choice(['C1001', 'C1002', 'C1003', 'C1004', 'C1005'])
     return {'client_id': client_id, 'name': f'Client {client_id}', 'account_id': f'ACC-{client_id}'}
 
-
 # --- Initialize Database  ---
-
 def init_db():
-    """Connects to the database and creates the APPROVED and REJECTED tables."""
     conn = sqlite3.connect(DATABASE_FILE)
     cursor = conn.cursor()
 
@@ -63,16 +56,15 @@ def init_db():
 
 
 def generate_trade():
-    """Generate a mock trade message."""
+    """Generate trades."""
 
     timestamp_part = datetime.now().strftime('%Y%m%d%H%M%S%f')
     counter_part = str(random.randint(1000, 9999))
 
-    # creating random trade_id as a combination of the above
-
+    #create trade_id with above combination
     trade_id = timestamp_part + counter_part
 
-    # Generate 5 unique base IDs using the new format
+
     base_trade_ids = [
         datetime.now().strftime('%Y%m%d%H%M%S%f') + '0001',
         datetime.now().strftime('%Y%m%d%H%M%S%f') + '0002',
@@ -81,15 +73,15 @@ def generate_trade():
         datetime.now().strftime('%Y%m%d%H%M%M%S%f') + '0005',
     ]
 
-    # Use a small set to ensure versioning conflicts occur
+#generate random trades
     trade_id = random.choice(base_trade_ids)
 
     #version
     if random.random() < 0.3:
-        version = random.randint(5, 10)  # high version
+        version = random.randint(5, 10)
     else:
-        version = random.randint(1, 4)  # repeat or lower version
-        version = random.randint(1, 4)  # repeat or lower version
+        version = random.randint(1, 4)
+        version = random.randint(1, 4)
 
     #maturity date
     rand_val = random.random()
@@ -188,7 +180,7 @@ def log_trade_action(trade, action, message):
 if __name__ == "__main__":
 
     #cleanup and initialize db
-    cleanup_database()
+    #cleanup_database()
     conn, cursor = init_db()
     print(f"\n--- Starting {TOTAL_TRADES_TO_GENERATE} trades ---")
 

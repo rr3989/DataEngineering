@@ -24,12 +24,11 @@ MOCK_CLIENTS = [
 ]
 
 # ---API & Kafka Configuration ---
-# API Endpoint receiver is running here
 API_ENDPOINT = "http://127.0.0.1:5000/api/trades/receive"
 # **DOCKER KAFKA BROKER ADDRESS**
 KAFKA_BROKERS = ['localhost:9092']
 KAFKA_TOPIC = 'trades-topic'
-API_TIMEOUT = 5  # Set a timeout for the API call
+API_TIMEOUT = 5
 
 """Generates a fast randomized trade dictionary with client/market details."""
 def generate_mock_trade():
@@ -97,7 +96,7 @@ def continuous_generation():
         while True:
             trade = generate_mock_trade()
 
-            # 1. Send to API Endpoint (HTTP POST)
+            # Send to API Endpoint (HTTP POST)
             try:
                 response = requests.post(API_ENDPOINT, json=trade, timeout=API_TIMEOUT)
                 if response.status_code == 200:
@@ -108,10 +107,9 @@ def continuous_generation():
             except requests.exceptions.RequestException:
                 print(f"API Connection Error for trade {trade['trade_id']}. Skipping API send.")
 
-            # 2. Send to Kafka Queue
+            # Send to Kafka Queue
             if producer:
                 try:
-                    # producer.send() is asynchronous. We don't wait for confirmation.
                     producer.send(KAFKA_TOPIC, value=trade)
                     total_kafka_success += 1
                 except Exception as e:
@@ -120,7 +118,7 @@ def continuous_generation():
             total_trades_sent += 1
             time.sleep(SLEEP_TIME_SECONDS)
 
-            # Periodically print stats to standard error (so it doesn't pollute the data stream)
+
             if total_trades_sent % 100 == 0:
                 elapsed_time = time.time() - start_time
                 tps = total_trades_sent / elapsed_time if elapsed_time > 0 else 0
@@ -129,7 +127,7 @@ def continuous_generation():
 
     except KeyboardInterrupt:
         if producer:
-            producer.flush()  # Ensure all buffered Kafka messages are sent before exiting
+            producer.flush()
         elapsed_time = time.time() - start_time
         tps = total_trades_sent / elapsed_time if elapsed_time > 0 else 0
         print(f"\n--- Hybrid Sender Simulation Stopped ---")
