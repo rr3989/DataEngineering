@@ -8,7 +8,7 @@ import uuid
 
 # --- Configuration ---
 PROJECT_ID = os.environ.get('PROJECT_ID', 'vibrant-mantis-289406')
-TOPIC_ID = "Trade-Events"
+TOPIC_ID = "Trades"
 RATE_SECONDS = 0.01
 
 # Initialize the Pub/Sub client

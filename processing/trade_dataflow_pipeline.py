@@ -12,7 +12,7 @@ logging.getLogger().setLevel(logging.INFO)
 # --- Configuration ---
 PROJECT_ID = 'vibrant-mantis-289406'
 REGION = 'us-central1'
-PUB_SUB_TOPIC = f'projects/{PROJECT_ID}/topics/Trade-Events'
+PUB_SUB_TOPIC = f'projects/{PROJECT_ID}/topics/Trades'
 BIGQUERY_APPROVED_TABLE = f'{PROJECT_ID}:trade_analysis.approved_trades_validated'
 BIGQUERY_REJECTED_TABLE = f'{PROJECT_ID}:trade_analysis.rejected_trades_audit'
 
@@ -25,24 +25,30 @@ APPROVED_SCHEMA = {
         {'name': 'trade_id', 'type': 'STRING', 'mode': 'REQUIRED'},
         {'name': 'version', 'type': 'INTEGER', 'mode': 'REQUIRED'},
         {'name': 'client_id', 'type': 'STRING', 'mode': 'REQUIRED'},
-        {'name': 'symbol', 'type': 'STRING', 'mode': 'REQUIRED'},
-        {'name': 'price', 'type': 'FLOAT', 'mode': 'REQUIRED'},
-        {'name': 'quantity', 'type': 'INTEGER', 'mode': 'REQUIRED'},
+        {'name': 'symbol', 'type': 'STRING', 'mode': 'REQUIRED'},   # <-- VERIFIED
+        {'name': 'price', 'type': 'FLOAT', 'mode': 'REQUIRED'},     # <-- VERIFIED
+        {'name': 'quantity', 'type': 'INTEGER', 'mode': 'REQUIRED'}, # <-- VERIFIED
         {'name': 'maturity_date', 'type': 'DATE', 'mode': 'NULLABLE'},
-        {'name': 'status', 'type': 'STRING', 'mode': 'REQUIRED'},  # E.g., APPROVED/REPLACED
+        {'name': 'timestamp', 'type': 'TIMESTAMP', 'mode': 'REQUIRED'},
+        {'name': 'status', 'type': 'STRING', 'mode': 'REQUIRED'}, # APPROVED or REPLACED
     ]
 }
+
 
 REJECTED_SCHEMA = {
     'fields': [
         {'name': 'trade_id', 'type': 'STRING', 'mode': 'REQUIRED'},
         {'name': 'version', 'type': 'INTEGER', 'mode': 'REQUIRED'},
         {'name': 'client_id', 'type': 'STRING', 'mode': 'REQUIRED'},
+        {'name': 'symbol', 'type': 'STRING', 'mode': 'NULLABLE'},
+        {'name': 'price', 'type': 'FLOAT', 'mode': 'NULLABLE'},
+        {'name': 'quantity', 'type': 'INTEGER', 'mode': 'NULLABLE'},
+        {'name': 'maturity_date', 'type': 'DATE', 'mode': 'NULLABLE'},
+        {'name': 'timestamp', 'type': 'TIMESTAMP', 'mode': 'REQUIRED'},
         {'name': 'rejection_reason', 'type': 'STRING', 'mode': 'REQUIRED'},
-        {'name': 'ingestion_time', 'type': 'TIMESTAMP', 'mode': 'REQUIRED'},
+        {'name': 'ingestion_time', 'type': 'TIMESTAMP', 'mode': 'REQUIRED'}, # Dataflow processing time
     ]
 }
-
 
 
 class TradeValidator(beam.DoFn):
@@ -150,7 +156,6 @@ def run_pipeline():
         approved_trades | 'WriteApprovedToBQ' >> io.WriteToBigQuery(
             table=BIGQUERY_APPROVED_TABLE,
             schema=APPROVED_SCHEMA,
-            #schema='SCHEMA_AUTODETECT',
             create_disposition=io.BigQueryDisposition.CREATE_IF_NEEDED,
             write_disposition=io.BigQueryDisposition.WRITE_APPEND
         )
@@ -159,7 +164,6 @@ def run_pipeline():
         rejected_trades | 'WriteRejectedToBQ' >> io.WriteToBigQuery(
             table=BIGQUERY_REJECTED_TABLE,
             schema=REJECTED_SCHEMA,
-            #schema='SCHEMA_AUTODETECT',
             create_disposition=io.BigQueryDisposition.CREATE_IF_NEEDED,
             write_disposition=io.BigQueryDisposition.WRITE_APPEND
         )

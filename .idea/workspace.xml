@@ -4,11 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ed470836-8daf-4473-9109-d78e623646ac" name="Changes" comment="Saved Trades to Local desktop sqllite and Generated Visual reports using matplotlib and dash">
-      <change afterPath="$PROJECT_DIR$/ingestion/startup.sh" afterDir="false" />
+    <list default="true" id="ed470836-8daf-4473-9109-d78e623646ac" name="Changes" comment="PubSub integration done and saving to big query almost done.">
+      <change afterPath="$PROJECT_DIR$/processing/dataflow_validator.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ingestion/trade_publisher.py" beforeDir="false" afterPath="$PROJECT_DIR$/ingestion/trade_publisher.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/processing/setup.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/processing/trade_dataflow_pipeline.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/trade_dataflow_pipeline.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -52,21 +51,21 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Python.dashboard.executor": "Run",
-    "Python.mock_trade_api_server.executor": "Run",
-    "Python.mock_trade_gcp_pubsub.executor": "Run",
-    "Python.mock_trade_local_store.executor": "Run",
-    "Python.mock_trade_single_server.executor": "Run",
-    "Python.report_generator.executor": "Run",
-    "Python.trade_publisher.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "master",
-    "settings.editor.selected.configurable": "preferences.lookFeel"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Python.dashboard.executor&quot;: &quot;Run&quot;,
+    &quot;Python.mock_trade_api_server.executor&quot;: &quot;Run&quot;,
+    &quot;Python.mock_trade_gcp_pubsub.executor&quot;: &quot;Run&quot;,
+    &quot;Python.mock_trade_local_store.executor&quot;: &quot;Run&quot;,
+    &quot;Python.mock_trade_single_server.executor&quot;: &quot;Run&quot;,
+    &quot;Python.report_generator.executor&quot;: &quot;Run&quot;,
+    &quot;Python.trade_publisher.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.lookFeel&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="D:\PyCharm\PycharmProjects\DataEngineering\ingestion" />
@@ -137,7 +136,15 @@
       <option name="project" value="LOCAL" />
       <updated>1765369135728</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="PubSub integration done and saving to big query almost done.">
+      <option name="closed" value="true" />
+      <created>1765392139475</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1765392139475</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -158,6 +165,7 @@
     <MESSAGE value="trades sent to GCP pub_sub queue successfully" />
     <MESSAGE value="DataFlow pipeline commit to GCP" />
     <MESSAGE value="Saved Trades to Local desktop sqllite and Generated Visual reports using matplotlib and dash" />
-    <option name="LAST_COMMIT_MESSAGE" value="Saved Trades to Local desktop sqllite and Generated Visual reports using matplotlib and dash" />
+    <MESSAGE value="PubSub integration done and saving to big query almost done." />
+    <option name="LAST_COMMIT_MESSAGE" value="PubSub integration done and saving to big query almost done." />
   </component>
 </project>
