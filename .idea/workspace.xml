@@ -4,11 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ed470836-8daf-4473-9109-d78e623646ac" name="Changes" comment="PubSub integration done and saving to big query almost done.">
-      <change afterPath="$PROJECT_DIR$/processing/dataflow_validator.py" afterDir="false" />
+    <list default="true" id="ed470836-8daf-4473-9109-d78e623646ac" name="Changes" comment="DataFlow is deployed, reading trades from GCP PubSub and storing data in BigQuery tables">
+      <change afterPath="$PROJECT_DIR$/storage/Dashboard_Chart_Query.sql" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/storage/General_Queries.sql" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ingestion/trade_publisher.py" beforeDir="false" afterPath="$PROJECT_DIR$/ingestion/trade_publisher.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/processing/trade_dataflow_pipeline.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/trade_dataflow_pipeline.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/storage/trades_view.sql" beforeDir="false" afterPath="$PROJECT_DIR$/storage/trades_view.sql" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -144,7 +144,15 @@
       <option name="project" value="LOCAL" />
       <updated>1765392139475</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="DataFlow is deployed, reading trades from GCP PubSub and storing data in BigQuery tables">
+      <option name="closed" value="true" />
+      <created>1765463014855</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1765463014855</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -166,6 +174,7 @@
     <MESSAGE value="DataFlow pipeline commit to GCP" />
     <MESSAGE value="Saved Trades to Local desktop sqllite and Generated Visual reports using matplotlib and dash" />
     <MESSAGE value="PubSub integration done and saving to big query almost done." />
-    <option name="LAST_COMMIT_MESSAGE" value="PubSub integration done and saving to big query almost done." />
+    <MESSAGE value="DataFlow is deployed, reading trades from GCP PubSub and storing data in BigQuery tables" />
+    <option name="LAST_COMMIT_MESSAGE" value="DataFlow is deployed, reading trades from GCP PubSub and storing data in BigQuery tables" />
   </component>
 </project>
