@@ -4,14 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ed470836-8daf-4473-9109-d78e623646ac" name="Changes" comment="queries stored in BigQuery and retrieving trades data">
+    <list default="true" id="ed470836-8daf-4473-9109-d78e623646ac" name="Changes" comment="TradeSimulation to local API, Docker Kafka and GCP PubSub">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tradesimulation/mock_trade_api_receiver.py" beforeDir="false" afterPath="$PROJECT_DIR$/tradesimulation/mock_trade_api_receiver.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tradesimulation/mock_trade_batch_server.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/tradesimulation/mock_trade_gcp_pubsub.py" beforeDir="false" afterPath="$PROJECT_DIR$/tradesimulation/mock_trade_gcp_pubsub.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tradesimulation/mock_trade_hybrid_processor.py" beforeDir="false" afterPath="$PROJECT_DIR$/tradesimulation/mock_trade_hybrid_processor.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tradesimulation/mock_trade_local_store.py" beforeDir="false" afterPath="$PROJECT_DIR$/tradesimulation/mock_trade_local_store.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tradesimulation/report_generator.py" beforeDir="false" afterPath="$PROJECT_DIR$/tradesimulation/report_generator.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ingestion/startup.sh" beforeDir="false" afterPath="$PROJECT_DIR$/ingestion/startup.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ingestion/trade_publisher.py" beforeDir="false" afterPath="$PROJECT_DIR$/ingestion/trade_publisher.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -163,7 +159,15 @@
       <option name="project" value="LOCAL" />
       <updated>1765469370575</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="TradeSimulation to local API, Docker Kafka and GCP PubSub">
+      <option name="closed" value="true" />
+      <created>1765472023204</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1765472023204</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -187,6 +191,7 @@
     <MESSAGE value="PubSub integration done and saving to big query almost done." />
     <MESSAGE value="DataFlow is deployed, reading trades from GCP PubSub and storing data in BigQuery tables" />
     <MESSAGE value="queries stored in BigQuery and retrieving trades data" />
-    <option name="LAST_COMMIT_MESSAGE" value="queries stored in BigQuery and retrieving trades data" />
+    <MESSAGE value="TradeSimulation to local API, Docker Kafka and GCP PubSub" />
+    <option name="LAST_COMMIT_MESSAGE" value="TradeSimulation to local API, Docker Kafka and GCP PubSub" />
   </component>
 </project>

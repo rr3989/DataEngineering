@@ -4,7 +4,6 @@ import random
 from datetime import datetime, timedelta
 from google.cloud import pubsub_v1
 import os
-import uuid
 
 # --- Configuration ---
 PROJECT_ID = os.environ.get('PROJECT_ID', 'vibrant-mantis-289406')
@@ -42,7 +41,6 @@ def generate_trade():
     if rand_val < 0.8:
         maturity_date = (datetime.now() + timedelta(days=random.randint(30, 365))).strftime('%Y-%m-%d')
     else:
-        # Simulate invalid/expired date for downstream testing
         maturity_date = (datetime.now() - timedelta(days=random.randint(1, 30))).strftime('%Y-%m-%d')
 
     client_info = get_client_info()
@@ -59,16 +57,12 @@ def generate_trade():
     }
     return trade_data
 
-
 def publish_trade(trade_data):
     """Publish a trade message dictionary to the Pub/Sub topic."""
 
-    # Pub/Sub messages must be bytes
     data_str = json.dumps(trade_data)
     data = data_str.encode("utf-8")
 
-    # Pub/Sub allows attributes (metadata) to be sent along with the message body
-    # We send the client_id as an attribute, which is useful for filtering/routing
     future = publisher.publish(
         topic_path,
         data,
@@ -76,8 +70,6 @@ def publish_trade(trade_data):
         symbol=trade_data['symbol']
     )
 
-    # The .result() call is optional but ensures the message was sent and is common in demos
-    # future.result()
     return future
 
 
@@ -96,10 +88,8 @@ if __name__ == "__main__":
 
             trade_count += 1
             if trade_count % 100 == 0:
-                # We skip printing every message for performance but log every 100th
                 print(
                     f"[{datetime.now().strftime('%H:%M:%S')}] Published {trade_count} trades. Last ID: {trade['trade_id']}")
-
             time.sleep(RATE_SECONDS)
 
     except KeyboardInterrupt:
