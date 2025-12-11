@@ -5,7 +5,6 @@ import json
 from datetime import datetime
 import logging
 
-# Set up logging for Cloud Logging
 logging.basicConfig()
 logging.getLogger().setLevel(logging.INFO)
 
@@ -25,9 +24,9 @@ APPROVED_SCHEMA = {
         {'name': 'trade_id', 'type': 'STRING', 'mode': 'REQUIRED'},
         {'name': 'version', 'type': 'INTEGER', 'mode': 'REQUIRED'},
         {'name': 'client_id', 'type': 'STRING', 'mode': 'REQUIRED'},
-        {'name': 'symbol', 'type': 'STRING', 'mode': 'REQUIRED'},   # <-- VERIFIED
-        {'name': 'price', 'type': 'FLOAT', 'mode': 'REQUIRED'},     # <-- VERIFIED
-        {'name': 'quantity', 'type': 'INTEGER', 'mode': 'REQUIRED'}, # <-- VERIFIED
+        {'name': 'symbol', 'type': 'STRING', 'mode': 'REQUIRED'},
+        {'name': 'price', 'type': 'FLOAT', 'mode': 'REQUIRED'},
+        {'name': 'quantity', 'type': 'INTEGER', 'mode': 'REQUIRED'},
         {'name': 'maturity_date', 'type': 'DATE', 'mode': 'NULLABLE'},
         {'name': 'timestamp', 'type': 'TIMESTAMP', 'mode': 'REQUIRED'},
         {'name': 'status', 'type': 'STRING', 'mode': 'REQUIRED'}, # APPROVED or REPLACED
@@ -46,17 +45,15 @@ REJECTED_SCHEMA = {
         {'name': 'maturity_date', 'type': 'DATE', 'mode': 'NULLABLE'},
         {'name': 'timestamp', 'type': 'TIMESTAMP', 'mode': 'REQUIRED'},
         {'name': 'rejection_reason', 'type': 'STRING', 'mode': 'REQUIRED'},
-        {'name': 'ingestion_time', 'type': 'TIMESTAMP', 'mode': 'REQUIRED'}, # Dataflow processing time
+        {'name': 'ingestion_time', 'type': 'TIMESTAMP', 'mode': 'REQUIRED'},
     ]
 }
 
 
 class TradeValidator(beam.DoFn):
     """
-    Applies business rules and uses Beam State to track the highest version
-    received for each trade_id.
+    Applies business rules for version
     """
-    # Define a state spec to store the highest version for a given key (trade_id)
     HIGHEST_VERSION_STATE = beam.transforms.userstate.BagStateSpec(
         'highest_version', beam.coders.PickleCoder()
     )
@@ -65,13 +62,12 @@ class TradeValidator(beam.DoFn):
 
         trade_id, trade_event_bytes = keyed_trade
 
-        # 2. Parse the incoming JSON message
+        # Parse JSON message
         try:
             trade = json.loads(trade_event_bytes.decode('utf-8'))
         except json.JSONDecodeError:
             logging.error(f"Failed to parse JSON: {trade_event_bytes}")
             return
-
 
         trade_id = trade.get('trade_id')
         new_version = trade.get('version', 0)
@@ -85,47 +81,37 @@ class TradeValidator(beam.DoFn):
 
         # ------------------ BUSINESS RULES -------------------
 
-        # Rule 1: Reject trades with a lower version than existing.
+        # Reject trades with a lower version than existing.
         if new_version < existing_version:
             rejection_reason = f"Version {new_version} is lower than existing version {existing_version}."
 
-        # Rule 2: Reject trades with a maturity date earlier than today.
+        # Reject trades with a maturity date earlier than today.
         elif maturity_date_str < today:
             rejection_reason = "Maturity date is in the past or invalid."
 
-        # Rule 3: Replace trades with the same version. (Handled by checking if a higher version is needed)
+        # Replace trades with the same version.
         elif new_version == existing_version:
             rejection_reason = f"Version {new_version} already exists. Higher version required to update/replace."
 
-
-        # ------------------ ROUTING -------------------
-
+        #Send trade to correct sink
         if rejection_reason:
             # Route to Rejected sink
             trade['rejection_reason'] = rejection_reason
             trade['ingestion_time'] = datetime.now().isoformat()
             yield beam.pvalue.TaggedOutput(TAG_REJECTED, trade)
         else:
-            # Route to Approved sink and update state
+            # Route to Approved sink
 
-            # 1. Update State
             if new_version > existing_version:
-                # Clear old version(s) and set the new highest version
                 highest_version_state.clear()
                 highest_version_state.add(new_version)
                 logging.info(f"Updated state for ID {trade_id}: New highest version is {new_version}")
 
-            # 2. Add validation status and yield Approved trade
             trade['status'] = 'APPROVED' if new_version > existing_version else 'REPLACED'
             yield beam.pvalue.TaggedOutput(TAG_APPROVED, trade)
 
-
-# --- 2. Pipeline Definition ---
-
 def run_pipeline():
-    """Builds and runs the Apache Beam pipeline."""
-
-    # Configure Pipeline Options for Dataflow Runner
+    # Pipeline for Dataflow
     options = PipelineOptions(
         runner='DataflowRunner',
         project=PROJECT_ID,
@@ -133,12 +119,12 @@ def run_pipeline():
         job_name=f'trade-validation-processor-{datetime.now().strftime("%Y%m%d-%H%M%S")}',
         temp_location=f'gs://{PROJECT_ID}-dataflow-temp/temp',
         staging_location=f'gs://{PROJECT_ID}-dataflow-temp/staging',
-        streaming=True,  # Crucial for Pub/Sub stream processing
+        streaming=True,  #Pub/Sub stream
         save_main_session=True
     )
 
     with beam.Pipeline(options=options) as p:
-        # 1. Read from Pub/Sub
+        # Read from Pub/Sub
         trades_stream = p | 'ReadFromPubSub' >> io.ReadFromPubSub(topic=PUB_SUB_TOPIC)
 
         keyed_trades = trades_stream | 'KeyByTradeID' >> beam.Map(
@@ -160,7 +146,7 @@ def run_pipeline():
             write_disposition=io.BigQueryDisposition.WRITE_APPEND
         )
 
-        # Write Rejected Trades to BigQuery Audit Log
+        # Write Rejected Trades to BigQuery Audit table
         rejected_trades | 'WriteRejectedToBQ' >> io.WriteToBigQuery(
             table=BIGQUERY_REJECTED_TABLE,
             schema=REJECTED_SCHEMA,
@@ -168,7 +154,7 @@ def run_pipeline():
             write_disposition=io.BigQueryDisposition.WRITE_APPEND
         )
 
-    logging.info("Dataflow Pipeline launched successfully.")
+    logging.info("Dataflow Pipeline launched.")
 
 
 # --- Run ---
