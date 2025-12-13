@@ -6,13 +6,13 @@ import os
 
 # --- Configuration ---
 DATABASE_FILE = "trade_validation_split.db"
-TOTAL_TRADES_TO_GENERATE = 5000
+TOTAL_TRADES_TO_GENERATE = 10000
 RATE_SECONDS = 0.001
 
-#def cleanup_database():
-    # if os.path.exists(DATABASE_FILE):
-        # os.remove(DATABASE_FILE)
-        # print(f"--- Cleaned up: '{DATABASE_FILE}'---")
+def cleanup_database():
+     if os.path.exists(DATABASE_FILE):
+         os.remove(DATABASE_FILE)
+         print(f"--- Cleaned up: '{DATABASE_FILE}'---")
 
 def get_client_info():
     client_id = random.choice(['C1001', 'C1002', 'C1003', 'C1004', 'C1005'])
@@ -31,6 +31,7 @@ def init_db():
         symbol TEXT NOT NULL,
         price REAL NOT NULL,
         quantity INTEGER NOT NULL,
+        side TEXT NOT NULL,
         maturity_date TEXT,
         status TEXT NOT NULL,
         timestamp TEXT NOT NULL,
@@ -60,8 +61,6 @@ def generate_trade():
 
     timestamp_part = datetime.now().strftime('%Y%m%d%H%M%S%f')
     counter_part = str(random.randint(1000, 9999))
-
-    #create trade_id with above combination
     trade_id = timestamp_part + counter_part
 
 
@@ -99,6 +98,7 @@ def generate_trade():
         "symbol": random.choice(['AAPL', 'GOOGL', 'MSFT', 'META', 'BK', 'AMZN', 'TSLA', 'NVDA', 'JPM', 'V', 'BABA', 'WMT']),
         "price": round(random.uniform(100.0, 2000.0), 2),
         "quantity": random.randint(50, 500),
+        "side": random.choice(['BUY','SELL']),
         "maturity_date": maturity_date,
         "timestamp": datetime.now().isoformat(),
     }
@@ -139,12 +139,12 @@ def insert_validated_trade(conn, cursor, new_trade):
 
     # Insert into Approved Trades
     insert_sql = """
-    INSERT INTO approved_trades (trade_id, version, client_id, symbol, price, quantity, maturity_date, status, timestamp)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+    INSERT INTO approved_trades (trade_id, version, client_id, symbol, price, quantity, side, maturity_date, status, timestamp)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
     """
     values = (
         new_trade['trade_id'], new_trade['version'], new_trade['client_id'], new_trade['symbol'],
-        new_trade['price'], new_trade['quantity'], new_trade['maturity_date'],
+        new_trade['price'], new_trade['quantity'], new_trade['side'], new_trade['maturity_date'],
         final_status, new_trade['timestamp']
     )
 
@@ -180,7 +180,7 @@ def log_trade_action(trade, action, message):
 if __name__ == "__main__":
 
     #cleanup and initialize db
-    #cleanup_database()
+    cleanup_database()
     conn, cursor = init_db()
     print(f"\n--- Starting {TOTAL_TRADES_TO_GENERATE} trades ---")
 
@@ -199,14 +199,13 @@ if __name__ == "__main__":
             time.sleep(RATE_SECONDS)
 
     except Exception as e:
-        print(f"\nAn unexpected error occurred at trade count {trade_count}: {e}")
+        print(f"\n error {trade_count}: {e}")
 
     finally:
         if 'conn' in locals() and conn:
             conn.close()
             print(f"\n--- Database connection closed. Total trade attempts: {trade_count} ---")
 
-            # Final verification
             conn_verify = sqlite3.connect(DATABASE_FILE)
             cursor_verify = conn_verify.cursor()
 

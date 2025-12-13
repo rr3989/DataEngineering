@@ -4,10 +4,16 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ed470836-8daf-4473-9109-d78e623646ac" name="Changes" comment="TradeIngestion to GCP PubSub Trades Topic">
+    <list default="true" id="ed470836-8daf-4473-9109-d78e623646ac" name="Changes" comment="Mock trades generating local JSON file to be uploaded to GCP bucket">
+      <change afterPath="$PROJECT_DIR$/orchestration/trade_validation_dag.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/processing/dataflow_validator.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/processing/trade_dataflow_pipeline.py" beforeDir="false" afterPath="$PROJECT_DIR$/processing/trade_dataflow_pipeline.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tradesimulation/mock_trade_api_receiver.py" beforeDir="false" afterPath="$PROJECT_DIR$/tradesimulation/mock_trade_api_receiver.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tradesimulation/mock_trade_gcp_pubsub.py" beforeDir="false" afterPath="$PROJECT_DIR$/tradesimulation/mock_trade_gcp_pubsub.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tradesimulation/mock_trade_local_store.py" beforeDir="false" afterPath="$PROJECT_DIR$/tradesimulation/mock_trade_local_store.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tradesimulation/reports/approved_price_histogram.png" beforeDir="false" afterPath="$PROJECT_DIR$/tradesimulation/reports/approved_price_histogram.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tradesimulation/reports/rejection_reasons_bar_chart.png" beforeDir="false" afterPath="$PROJECT_DIR$/tradesimulation/reports/rejection_reasons_bar_chart.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tradesimulation/reports/summary_pie_chart.png" beforeDir="false" afterPath="$PROJECT_DIR$/tradesimulation/reports/summary_pie_chart.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/tradesimulation/trade_validation_split.db" beforeDir="false" afterPath="$PROJECT_DIR$/tradesimulation/trade_validation_split.db" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -22,6 +28,7 @@
     </option>
   </component>
   <component name="Git.Settings">
+    <option name="PUSH_AUTO_UPDATE" value="true" />
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="GitHubPullRequestSearchHistory">{
@@ -55,6 +62,7 @@
     &quot;Python.dashboard.executor&quot;: &quot;Run&quot;,
     &quot;Python.mock_trade_api_server.executor&quot;: &quot;Run&quot;,
     &quot;Python.mock_trade_gcp_pubsub.executor&quot;: &quot;Run&quot;,
+    &quot;Python.mock_trade_generate_file.executor&quot;: &quot;Run&quot;,
     &quot;Python.mock_trade_local_store.executor&quot;: &quot;Run&quot;,
     &quot;Python.mock_trade_single_server.executor&quot;: &quot;Run&quot;,
     &quot;Python.report_generator.executor&quot;: &quot;Run&quot;,
@@ -175,7 +183,23 @@
       <option name="project" value="LOCAL" />
       <updated>1765472306445</updated>
     </task>
-    <option name="localTasksCounter" value="12" />
+    <task id="LOCAL-00012" summary="DataFlow pipeline validation and Storing in BigQuery Tables">
+      <option name="closed" value="true" />
+      <created>1765473112170</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1765473112170</updated>
+    </task>
+    <task id="LOCAL-00013" summary="Mock trades generating local JSON file to be uploaded to GCP bucket">
+      <option name="closed" value="true" />
+      <created>1765590877538</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1765590877538</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -201,6 +225,8 @@
     <MESSAGE value="queries stored in BigQuery and retrieving trades data" />
     <MESSAGE value="TradeSimulation to local API, Docker Kafka and GCP PubSub" />
     <MESSAGE value="TradeIngestion to GCP PubSub Trades Topic" />
-    <option name="LAST_COMMIT_MESSAGE" value="TradeIngestion to GCP PubSub Trades Topic" />
+    <MESSAGE value="DataFlow pipeline validation and Storing in BigQuery Tables" />
+    <MESSAGE value="Mock trades generating local JSON file to be uploaded to GCP bucket" />
+    <option name="LAST_COMMIT_MESSAGE" value="Mock trades generating local JSON file to be uploaded to GCP bucket" />
   </component>
 </project>
