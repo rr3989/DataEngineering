@@ -30,6 +30,7 @@ APPROVED_SCHEMA = {
         {'name': 'maturity_date', 'type': 'DATE', 'mode': 'NULLABLE'},
         {'name': 'timestamp', 'type': 'TIMESTAMP', 'mode': 'REQUIRED'},
         {'name': 'status', 'type': 'STRING', 'mode': 'REQUIRED'}, # APPROVED or REPLACED
+        {'name': 'side', 'type': 'STRING', 'mode': 'REQUIRED'},
     ]
 }
 
@@ -46,6 +47,7 @@ REJECTED_SCHEMA = {
         {'name': 'timestamp', 'type': 'TIMESTAMP', 'mode': 'REQUIRED'},
         {'name': 'rejection_reason', 'type': 'STRING', 'mode': 'REQUIRED'},
         {'name': 'ingestion_time', 'type': 'TIMESTAMP', 'mode': 'REQUIRED'},
+        {'name': 'side', 'type': 'STRING', 'mode': 'REQUIRED'},
     ]
 }
 
@@ -130,11 +132,9 @@ def run_pipeline():
         keyed_trades = trades_stream | 'KeyByTradeID' >> beam.Map(
             lambda trade: (json.loads(trade.decode('utf-8')).get('trade_id'), trade)
         )
-
         validated_trades = keyed_trades | 'ValidateAndRoute' >> beam.ParDo(TradeValidator()).with_outputs(
             TAG_APPROVED, TAG_REJECTED
         )
-
         approved_trades = validated_trades[TAG_APPROVED]
         rejected_trades = validated_trades[TAG_REJECTED]
 
@@ -155,7 +155,6 @@ def run_pipeline():
         )
 
     logging.info("Dataflow Pipeline launched.")
-
 
 # --- Run ---
 if __name__ == '__main__':

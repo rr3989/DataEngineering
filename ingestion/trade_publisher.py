@@ -52,13 +52,14 @@ def generate_trade():
         "symbol": random.choice(['AAPL', 'GOOGL', 'MSFT', 'META', 'BK', 'AMZN', 'TSLA', 'NVDA', 'JPM', 'V', 'BABA', 'WMT']),
         "price": round(random.uniform(100.0, 2000.0), 2),
         "quantity": random.randint(50, 500),
+        "side": random.choice(['BUY','SELL']),
         "maturity_date": maturity_date,
         "timestamp": datetime.now().isoformat(),
     }
     return trade_data
 
 def publish_trade(trade_data):
-    """Publish a trade message dictionary to the Pub/Sub topic."""
+    """Publish trade message to the Pub/Sub topic."""
 
     data_str = json.dumps(trade_data)
     data = data_str.encode("utf-8")
