@@ -40,7 +40,6 @@ def generate_mock_trade():
     trade_type = random.choice(TRADE_TYPES)
     price = round(random.uniform(10.00, 2000.00), 2)
     quantity = random.randint(100, 5000)
-    side=random.choice(SIDE)
     currency = random.choice(CURRENCIES)
     exchange = random.choice(EXCHANGES)
     now = datetime.datetime.now()
@@ -65,7 +64,6 @@ def generate_mock_trade():
             'type': trade_type,
             'price': price,
             'quantity': quantity,
-            'side':side,
             'notional_value': round(price * quantity, 2)
         },
         'timestamp': timestamp
